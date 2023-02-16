@@ -1,25 +1,38 @@
+import { Button } from "@mui/material";
 import { Container } from "@mui/system";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { useAccount, useConnect } from 'wagmi'
+import { useAccount, useBalance } from 'wagmi'
+import Game from "./Game/Game";
 
 export default function Body() {
     const { address, isConnected } = useAccount()
+    const [isStarted, setIsStarted] = useState(false)
+
     useEffect(() => {
         console.log(address)
         console.log(isConnected)
     }, [isConnected])
+
     return (
         <body>
-            {isConnected ? (
-                <Container>
+            {isConnected ?
+                isStarted ?
+                    <Game setIsStarted={setIsStarted} /> : (<Button
+                        onClick={() => setIsStarted(true)}
+                        variant="contained"
+                        size="large"
+                    >
+                        Начать играть
+                    </Button>)
 
-                </Container>
-            ) : (
-                <Container>
-                    <h1>Вы не подключили кошелёк</h1>
-                </Container>
-            )}
+                : (
+                    <Container>
+                        <h2>Данный сайт представляет собой децентрализованное прилоэение по всем известной игре "Камень-ножницы-бумага".
+                            Для начала игры подключите свой кошелек к сайту.
+                        </h2>
+                    </Container>
+                )}
 
         </body>
     )

@@ -1,0 +1,20 @@
+.game {
+    position: absolute;
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%);
+    width: 100%;
+}
+
+.paper {
+    cursor: pointer;
+}
+
+.gameTitle {
+    margin-bottom: 40px;
+}
+
+.icon {
+    width: 64px;
+    margin: 20px;
+}

@@ -42,6 +42,9 @@ export default function Header(props) {
                     </h1>
                     <WagmiConfig client={wagmiClient} />
                     <Web3Modal
+                        themeMode='dark'
+                        themeColor='orange'
+                        themeBackground= "gradient"
                         projectId="fce1807c0f933d7d40b1889b819f3ee1"
                         ethereumClient={ethereumClient}
                     />

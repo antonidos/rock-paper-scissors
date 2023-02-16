@@ -1,23 +1,25 @@
-
 .logo {
-    text-align: center;
-    background: linear-gradient(to right, #000 20%, #800 40%, #800080 60%, #000080 80%);
-    background-size: 200% auto;
-    color: #000;
-    background-clip: text;
-    text-fill-color: transparent;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    -webkit-animation: shine 2s linear infinite;
-            animation: shine 2s linear infinite;
+  margin: 20px 0;
+  text-align: center;
+  background: linear-gradient(to right, #000 20%, #800 40%, #800 60%, #000 80%);
+  background-size: 200% auto;
+  color: #000;
+  background-clip: text;
+  text-fill-color: transparent;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-animation: shine 2s linear infinite;
+  animation: shine 2s linear infinite;
+}
+
+@-webkit-keyframes shine {
+  to {
+    background-position: 200% center;
   }
-  @-webkit-keyframes shine {
-    to {
-      background-position: 200% center;
-    }
+}
+
+@keyframes shine {
+  to {
+    background-position: 200% center;
   }
-  @keyframes shine {
-    to {
-      background-position: 200% center;
-    }
-  }
+}

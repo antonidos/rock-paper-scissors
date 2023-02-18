@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useAccount, useBalance } from 'wagmi'
 import Game from "./Game/Game";
 
-export default function Body() {
+export default function Body(props) {
     const { address, isConnected } = useAccount()
     const [isStarted, setIsStarted] = useState(false)
 
@@ -15,7 +15,7 @@ export default function Body() {
     }, [isConnected])
 
     return (
-        <body>
+        <>
             {isConnected ?
                 isStarted ?
                     <Game setIsStarted={setIsStarted} /> : (<Button
@@ -34,6 +34,6 @@ export default function Body() {
                     </Container>
                 )}
 
-        </body>
+        </>
     )
 }

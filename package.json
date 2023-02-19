@@ -13,13 +13,16 @@
     "@web3modal/ethereum": "^2.1.1",
     "@web3modal/react": "^2.1.1",
     "ethers": "^5.7.2",
+    "notistack": "^2.0.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-query": "^3.39.3",
     "react-scripts": "5.0.1",
     "styled-components": "^5.3.6",
     "wagmi": "^0.11.5",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "web3": "^1.8.2",
+    "web3-utils": "^1.8.2"
   },
   "scripts": {
     "start": "react-scripts start",

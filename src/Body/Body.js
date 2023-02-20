@@ -1,4 +1,3 @@
-import { Button } from "@mui/material";
 import { Container } from "@mui/system";
 import { useEffect, useState } from "react";
 import styles from './Game/Game.module.css'
@@ -12,7 +11,6 @@ export default function Body(props) {
     const [isStarted, setIsStarted] = useState(false)
     const { switchNetwork } = useSwitchNetwork();
     const { chain } = useNetwork();
-    
 
     useEffect(() => {
         if (chain) {

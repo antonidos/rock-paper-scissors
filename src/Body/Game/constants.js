@@ -19,9 +19,7 @@ export const currencies = [
 	["BNB", ""]
 ]
 
-export const tokens = ["0x85E365D9e14F424D3C607d0feef0e5E68cfE0E8f"]
-
-export const contractAddress = "0x21Be28b14a73089EAd63921e2dAef50184F05060"
+export const contractAddress = "0xEA6419EC3Cc0255695ca0812A3b4f886d14e6ddD"
 
 export const abiErc20 = [
 	{
@@ -365,6 +363,12 @@ export const abiMyContract = [
 			},
 			{
 				"indexed": false,
+				"internalType": "address",
+				"name": "player",
+				"type": "address"
+			},
+			{
+				"indexed": false,
 				"internalType": "uint8",
 				"name": "result",
 				"type": "uint8"
@@ -501,6 +505,19 @@ export const abiMyContract = [
 		"name": "startGame",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint8",
+				"name": "_choice",
+				"type": "uint8"
+			}
+		],
+		"name": "startGameBnb",
+		"outputs": [],
+		"stateMutability": "payable",
 		"type": "function"
 	},
 	{

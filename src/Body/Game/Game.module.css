@@ -43,6 +43,10 @@
     margin: 10px 0;
 }
 
+.input {
+    margin: 10px 0 !important;
+}
+
 .error {
     color: brown;
 }

@@ -9,10 +9,6 @@ import { useEffect } from 'react';
 function App() {
   const { enqueueSnackbar } = useSnackbar();
 
-  useEffect(() => {
-    handleSnackbar('success','hello')
-  }, [])
-
   const handleSnackbar = (variant, body) => {
     // variant could be success, error, warning, info, or default
     enqueueSnackbar(body, { variant });

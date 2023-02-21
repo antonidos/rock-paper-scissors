@@ -11,6 +11,19 @@ export const style = {
 	borderRadius: "20px"
 };
 
+export const styleMobile = {
+	position: 'absolute',
+	top: '50%',
+	left: '50%',
+	transform: 'translate(-50%, -50%)',
+	width: 270,
+	bgcolor: 'background.paper',
+	border: '2px solid #000',
+	boxShadow: 24,
+	p: 4,
+	borderRadius: "20px"
+};
+
 export const items = ["камень", "ножницы", "бумага"]
 export const currencies = [
 	["USDT", "0xee8908AB53993e596A373ddbcb3AC5656aD6Aa38"],

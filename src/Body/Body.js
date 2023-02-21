@@ -9,7 +9,7 @@ import { MyContainedButton } from "../stylizedComponents";
 export default function Body(props) {
     const { address, isConnected } = useAccount()
     const [isStarted, setIsStarted] = useState(false)
-    const { switchNetwork } = useSwitchNetwork();
+    const { chains, switchNetwork } = useSwitchNetwork();
     const { chain } = useNetwork();
 
     useEffect(() => {
@@ -17,11 +17,6 @@ export default function Body(props) {
             if (chain?.id !== 97) switchNetwork?.(97) 
         }
     }, [chain, switchNetwork])
-
-    useEffect(() => {
-        console.log(address)
-        console.log(isConnected)
-    }, [isConnected])
 
     return (
         <Container className={styles.game}>

@@ -1,19 +1,20 @@
 import { Box, Button, Grid, Modal, Paper, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { useMediaQuery } from 'react-responsive'
 import rock from '../../icons/stone.png'
 import scissors from '../../icons/scissors.png'
 import paper from '../../icons/new-document.png'
 import styles from './Game.module.css'
 import { ethers } from 'ethers';
-import { useEffect, useState } from "react";
-import { useAccount, useContractEvent, useContractWrite, usePrepareContractWrite } from 'wagmi'
-import { abiMyContract, abiErc20, items, currencies, style, contractAddress } from './constants';
+import { useEffect, useLayoutEffect, useState } from "react";
+import { useAccount, useContractEvent, useContractWrite, usePrepareContractWrite, useProvider } from 'wagmi'
+import { abiMyContract, abiErc20, items, currencies, style, contractAddress, styleMobile } from './constants';
 import { fromWei, toWei } from 'web3-utils';
 import { MyContainedButton, MyTextField } from "../../stylizedComponents";
 
-const provider = new ethers.providers.Web3Provider(window.ethereum)
-const { ethereum } = window;
-
 export default function Game(props) {
+    const isDesktop = useMediaQuery({ minWidth: 500 })
+    const provider = useProvider()
+
     const { setIsStarted, handleSnackbar } = props;
     const [open, setOpen] = useState(false);
     const [item, setItem] = useState(0);
@@ -48,9 +49,8 @@ export default function Game(props) {
         abi: abiErc20,
         eventName: 'Approval',
         listener(owner, spender, valueApprove) {
-            console.log(owner, spender, valueApprove)
             if (owner === address && spender === contractAddress && valueApprove >= value) {
-                if (errorWrite[0] && errorWrite[1].includes("approve")){
+                if (errorWrite[0] && errorWrite[1].includes("approve")) {
                     handleSnackbar('success', "Токен одобрен");
                     setErrorWrite([false, '']);
                 }
@@ -181,7 +181,7 @@ export default function Game(props) {
     }
 
     const getTokens = () => {
-        if(errorGetTokens[0]) handleSnackbar('error', errorGetTokens[1])
+        if (errorGetTokens[0]) handleSnackbar('error', errorGetTokens[1])
         else getTokensCall()
     }
 
@@ -227,9 +227,15 @@ export default function Game(props) {
             <div className={styles.playArea}>
                 <h2 className={styles.gameTitle}>Выберите элемент:</h2>
                 <Grid sx={{ mb: "50px" }} container justifyContent="space-around">
-                    <Paper onClick={() => selectItem(0)} className={styles.paper}><img alt="камень" className={styles.icon} src={rock}></img></Paper>
-                    <Paper onClick={() => selectItem(1)} className={styles.paper}><img alt="ножницы" className={styles.icon} src={scissors}></img></Paper>
-                    <Paper onClick={() => selectItem(2)} className={styles.paper}><img alt="бумага" className={styles.icon} src={paper}></img></Paper>
+                    <Paper onClick={() => selectItem(0)} className={styles.paper}>
+                        <img alt="камень" className={isDesktop ? styles.icon : styles.iconMobile} src={rock}></img>
+                    </Paper>
+                    <Paper onClick={() => selectItem(1)} className={styles.paper}>
+                        <img alt="ножницы" className={isDesktop ? styles.icon : styles.iconMobile} src={scissors}></img>
+                    </Paper>
+                    <Paper onClick={() => selectItem(2)} className={styles.paper}>
+                        <img alt="бумага" className={isDesktop ? styles.icon : styles.iconMobile} src={paper}></img>
+                    </Paper>
                 </Grid>
                 <MyContainedButton
                     onClick={() => setIsStarted(false)}
@@ -240,7 +246,7 @@ export default function Game(props) {
                     open={open}
                     onClose={handleClose}
                 >
-                    <Box sx={style}>
+                    <Box sx={isDesktop ? style : styleMobile}>
                         <h2>Выбранный элемент: <span className={styles.strongText}>{items[item]}</span></h2>
                         <p className={styles.modal}>Выберите монету, принимаемую в виде ставки:</p>
                         <ToggleButtonGroup
@@ -276,7 +282,21 @@ export default function Game(props) {
                         <div className={styles.modal}>
                             <Grid container justifyContent="space-around">
                                 <MyContainedButton onClick={handleClose}>Отменить выбор</MyContainedButton>
-                                <Button color="success" disabled={!value || isNaN(value) || Number(value) <= 0 || !currency || errorWrite[0] || value === 0} onClick={startGame} variant="contained">Подтвердить выбор</Button>
+                                <Button color="success"
+                                    disabled={
+                                        !value ||
+                                        isNaN(value) ||
+                                        Number(value) <= 0 ||
+                                        !currency ||
+                                        errorWrite[0] ||
+                                        value === 0
+                                    }
+                                    sx={!isDesktop && {mt:"15px"}}
+                                    onClick={startGame}
+                                    variant="contained"
+                                    >
+                                    Подтвердить выбор
+                                </Button>
                             </Grid>
                         </div>
                     </Box>

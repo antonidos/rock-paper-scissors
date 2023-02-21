@@ -3,17 +3,24 @@ import styles from './Header.module.css'
 import { Web3Button, Web3Modal } from "@web3modal/react";
 import { Grid } from '@mui/material';
 import { bscTestnet } from 'wagmi/chains';
-
+import { useMediaQuery } from 'react-responsive';
 
 export default function Header({ ethereumClient }) {
-
+    const isDesktop = useMediaQuery({ minWidth: 480 })
     return (
         <>
             <Container>
                 <Grid container justifyContent='space-between' alignItems='center'>
-                    <h1 className={styles.logo}>
-                        Rock Paper Scissors
-                    </h1>
+                    {isDesktop ? (
+                        <h1 className={styles.logo}>
+                            Rock Paper Scissors
+                        </h1>
+                    ) : (
+                        <h2 className={styles.logo}>
+                            Rock Paper Scissors
+                        </h2>
+                    )}
+
 
                     <Web3Modal
                         themeMode='dark'

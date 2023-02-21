@@ -19,7 +19,8 @@ export default function Game(props) {
     const [item, setItem] = useState(0);
     const [currency, setCurrency] = useState(currencies[0]);
     const [value, setValue] = useState(0);
-    const [error, setError] = useState([false, '']);
+    const [errorWrite, setErrorWrite] = useState([false, '']);
+    const [errorGetTokens, setErrorGetTokens] = useState([false, '']);
     const [balance, setBalance] = useState(0);
     const [enabled, setEnabled] = useState({
         bnb: false,
@@ -27,11 +28,6 @@ export default function Game(props) {
     })
 
     const { address } = useAccount()
-
-    // useEffect(() => {
-    //     console.log(ethereum)
-    //     console.log(provider)
-    // }, [])
 
     useContractEvent({
         address: contractAddress,
@@ -42,6 +38,22 @@ export default function Game(props) {
                 if (result === 0) handleSnackbar('success', 'К сожалению, вы проиграли')
                 if (result === 1) handleSnackbar('success', 'Ничья! Попробуете еще раз?')
                 if (result === 2) handleSnackbar('success', 'Вы выиграли, поздравляем!')
+                setTimeout(getBalance, 1500, currencies[currencies.indexOf(currency)][1])
+            }
+        },
+    })
+
+    useContractEvent({
+        address: currency[1],
+        abi: abiErc20,
+        eventName: 'Approval',
+        listener(owner, spender, valueApprove) {
+            console.log(owner, spender, valueApprove)
+            if (owner === address && spender === contractAddress && valueApprove >= value) {
+                if (errorWrite[0] && errorWrite[1].includes("approve")){
+                    handleSnackbar('success', "Токен одобрен");
+                    setErrorWrite([false, '']);
+                }
             }
         },
     })
@@ -66,73 +78,95 @@ export default function Game(props) {
         }
     }
 
-    const { startGameBnbConfig } = usePrepareContractWrite({
+    const { config: startGameBnbConfig } = usePrepareContractWrite({
         address: contractAddress,
         abi: abiMyContract,
-        enabled: enabled.bnb,
+        enabled: enabled.bnb && open && value,
         functionName: 'startGameBnb',
         args: [item + 1],
         overrides: {
-            value: value
+            value: value,
         },
         onError: (e) => {
             const error = e?.error?.data?.message || e.data.message;
-            setError([true, error])
+            setErrorWrite([true, error])
             handleSnackbar('error', error)
-        },
-        onSuccess(data) {
-            if (error[0]) setError([false, ''])
         }
     })
-
     const { write: startGameBnbCall } = useContractWrite({
         ...startGameBnbConfig,
         onSuccess: (data) => {
             handleSnackbar('success', "Транзакция была успешно отправлена")
+        },
+        onError: (e) => {
+            const error = e?.message || "Error!";
+            handleSnackbar('error', error)
         }
     })
 
     const { config: startGameConfig } = usePrepareContractWrite({
         address: contractAddress,
         abi: abiMyContract,
-        enabled: enabled.erc20,
+        enabled: enabled.erc20 && open && value,
         functionName: 'startGame',
         args: [currency?.[1],
         item + 1, value],
         onError: (e) => {
             const error = e?.error?.data?.message || e.data.message;
-            setError([true, error])
+            setErrorWrite([true, error])
             handleSnackbar('error', error)
-        },
-        onSuccess(data) {
-            if (error[0]) setError([false, ''])
         }
     })
     const { write: startGameCall } = useContractWrite({
         ...startGameConfig,
         onSuccess: (data) => {
             handleSnackbar('success', "Транзакция была успешно отправлена")
+        },
+        onError: (e) => {
+            const error = e?.message || "Error!";
+            handleSnackbar('error', error)
         }
     })
 
     const { config: approveConfig } = usePrepareContractWrite({
         address: currency?.[1] || currencies[0][1],
         abi: abiErc20,
+        enabled: open,
         functionName: 'approve',
         args: [contractAddress, "115792089237316195423570985008687907853269984665640564039457"],
         onError: (e) => {
             const error = e.error.data.message;
-            setError([true, error])
+            setErrorWrite([true, error])
             handleSnackbar('error', error)
-        },
-        onSuccess(data) {
-            if (error[0]) setError([false, ''])
         }
     })
     const { write: approveCall } = useContractWrite({
         ...approveConfig,
+        onError: (e) => {
+            const error = e?.message || "Error!";
+            handleSnackbar('error', error)
+        }
+    })
+
+    const { config: getTokensConfig } = usePrepareContractWrite({
+        address: contractAddress,
+        abi: abiMyContract,
+        enabled: enabled.erc20 && open && value,
+        functionName: 'getTestTokens',
+        args: [currency[1]],
+        onError: (e) => {
+            const error = e?.error?.data?.message || e.data.message;
+            setErrorGetTokens([true, error])
+        }
+    })
+    const { write: getTokensCall } = useContractWrite({
+        ...getTokensConfig,
         onSuccess: (data) => {
-            handleSnackbar('success', "Токен одобрен")
+            handleSnackbar('success', "Токен запрошен")
+        },
+        onError: (e) => {
+            const error = e?.message || "Error!";
+            handleSnackbar('error', error)
         }
     })
 
@@ -146,11 +180,16 @@ export default function Game(props) {
         approveCall()
     }
 
+    const getTokens = () => {
+        if(errorGetTokens[0]) handleSnackbar('error', errorGetTokens[1])
+        else getTokensCall()
+    }
+
     const handleClose = () => {
         setOpen(false)
         setValue(0)
         setItem(0)
-        setError([false, ''])
+        setErrorWrite([false, ''])
     }
 
     const startGame = () => {
@@ -159,22 +198,28 @@ export default function Game(props) {
             return 0;
         }
         else {
-            if (currencies.indexOf(currency) !== 3) startGameCall();
+            if (enabled.erc20) startGameCall();
             else startGameBnbCall()
         }
     }
 
-    const handleChange = ({ target: { value } }) => {
-        if (value) setValue(toWei(value))
-        else setValue(0)
+    const handleChangeValue = ({ target: { value } }) => {
+        if (errorWrite[0]) setErrorWrite([false, '']);
+
+        if (value) setValue(toWei(value));
+        else setValue(0);
     }
 
-    const selectCurrency = (currency) => {
-        if(currency !== 3) setEnabled({erc20: true, bnb: false})
-        else setEnabled({erc20: false, bnb: true})
-        setCurrency(currencies[currency])
-        if (currencies[currency][1]) getBalance(currencies[currency][1])
-        else getBalance()
+    const selectCurrency = (selectedCurrency) => {
+        if (errorWrite[0] && currencies[selectedCurrency] !== currency) setErrorWrite([false, '']);
+        // if (errorGetTokens[0] && currencies[selectedCurrency] !== currency) setErrorGetTokens([false, ''])
+
+        if (selectedCurrency !== 3) setEnabled({ erc20: true, bnb: false });
+        else setEnabled({ erc20: false, bnb: true });
+
+        setCurrency(currencies[selectedCurrency]);
+
+        getBalance(currencies[selectedCurrency][1])
     }
 
     return (
@@ -211,21 +256,27 @@ export default function Game(props) {
                             <>
                                 <Grid spacing={2} container alignItems='center' sx={{ marginBottom: "10px" }}>
                                     <Grid item><p>Выбранная монета: <span className={styles.strongText}>{currency[0]}</span></p></Grid>
-                                    {error[1]?.includes("approve") ?
+                                    {errorWrite[1]?.includes("approve") ?
                                         <Grid item>
                                             <MyContainedButton onClick={infinityApprove}>Approve</MyContainedButton>
                                         </Grid>
                                         : null}
+                                    {errorWrite[1]?.includes("insufficent") && !errorWrite[1]?.includes("contract") ?
+                                        <Grid item>
+                                            <MyContainedButton onClick={getTokens}>Get 100 {currency[0]}</MyContainedButton>
+                                        </Grid>
+                                        : null}
                                 </Grid>
+
                                 Баланс: <span className={styles.strongText}>{balance}</span>
                             </>
                         ) : null}
-                        <MyTextField type="number" onChange={handleChange} className={styles.input} label="Введите количество" size="small" variant="outlined" fullWidth />
-                        {error[1]?.length ? <span className={styles.error}>{error[1]}</span> : null}
+                        <MyTextField type="number" onChange={handleChangeValue} className={styles.input} label="Введите количество" size="small" variant="outlined" fullWidth />
+                        {errorWrite[1]?.length ? <span className={styles.error}>{errorWrite[1]}</span> : null}
                         <div className={styles.modal}>
                             <Grid container justifyContent="space-around">
                                 <MyContainedButton onClick={handleClose}>Отменить выбор</MyContainedButton>
-                                <Button color="success" disabled={!value || Number(value) === NaN || Number(value) <= 0 || !currency || error[0] || value === 0} onClick={startGame} variant="contained">Подтвердить выбор</Button>
+                                <Button color="success" disabled={!value || isNaN(value) || Number(value) <= 0 || !currency || errorWrite[0] || value === 0} onClick={startGame} variant="contained">Подтвердить выбор</Button>
                             </Grid>
                         </div>
                     </Box>

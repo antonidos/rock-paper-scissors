@@ -32,6 +32,10 @@ export const currencies = [
 	["BNB", ""]
 ]
 
+export function isDefined<T>(value: T | undefined | null): value is T {
+	return <T>value !== undefined && <T>value !== null;
+}
+
 export const contractAddress = "0x9de7980C00B53726726eb04a0F04585924fE1269"
 
 export const abiErc20 = [

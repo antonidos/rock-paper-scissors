@@ -1,6 +1,7 @@
-import { Button, TextField } from "@mui/material";
+import { Button, ButtonProps, TextField, TextFieldProps } from "@mui/material";
+import * as React from "react";
 
-export const MyContainedButton = (props) => (<Button
+export const MyContainedButton = (props: ButtonProps) => (<Button
     variant="contained"
     {...props}
     sx={{
@@ -11,7 +12,7 @@ export const MyContainedButton = (props) => (<Button
     }}>
 </Button>)
 
-export const MyTextField = (props) => (<TextField
+export const MyTextField = (props: TextFieldProps) => (<TextField
     {...props}
     sx={{
         '& label.Mui-focused': {

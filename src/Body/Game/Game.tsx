@@ -1,17 +1,30 @@
 import { Box, Button, Grid, Modal, Paper, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { useMediaQuery } from 'react-responsive'
-import rock from '../../icons/stone.png'
-import scissors from '../../icons/scissors.png'
-import paper from '../../icons/new-document.png'
-import styles from './Game.module.css'
-import { ethers } from 'ethers';
+import './Game.css'
+import { BigNumber, ethers } from 'ethers';
 import { useEffect, useLayoutEffect, useState } from "react";
 import { useAccount, useContractEvent, useContractWrite, usePrepareContractWrite, useProvider } from 'wagmi'
-import { abiMyContract, abiErc20, items, currencies, style, contractAddress, styleMobile } from './constants';
+import { abiMyContract, abiErc20, items, currencies, style, contractAddress, styleMobile, isDefined } from './constants';
 import { fromWei, toWei } from 'web3-utils';
 import { MyContainedButton, MyTextField } from "../../stylizedComponents";
+import * as React from "react";
+import { VariantType } from "notistack";
 
-export default function Game(props) {
+
+const rock = '../../../public/icons/stone.png'
+const scissors = '../../../public/icons/scissors.png'
+const paper = '../../../public/icons/new-document.png'
+
+interface GameProps {
+    setIsStarted: React.Dispatch<React.SetStateAction<boolean>>,
+    handleSnackbar: (variant: VariantType, body: any) => void
+}
+
+type IError = [[boolean, string], React.Dispatch<React.SetStateAction<[boolean, string]>>]
+
+export default function Game(props: GameProps) {
+    
+
     const isDesktop = useMediaQuery({ minWidth: 500 })
     const provider = useProvider()
 
@@ -19,9 +32,9 @@ export default function Game(props) {
     const [open, setOpen] = useState(false);
     const [item, setItem] = useState(0);
     const [currency, setCurrency] = useState(currencies[0]);
-    const [value, setValue] = useState(0);
-    const [errorWrite, setErrorWrite] = useState([false, '']);
-    const [errorGetTokens, setErrorGetTokens] = useState([false, '']);
+    const [value, setValue] = useState('0');
+    const [errorWrite, setErrorWrite]: IError = useState([false, '']);
+    const [errorGetTokens, setErrorGetTokens]: IError = useState([false, '']);
     const [balance, setBalance] = useState(0);
     const [enabled, setEnabled] = useState({
         bnb: false,
@@ -45,7 +58,7 @@ export default function Game(props) {
     })
 
     useContractEvent({
-        address: currency[1],
+        address: currency[1] as `0x${string}`,
         abi: abiErc20,
         eventName: 'Approval',
         listener(owner, spender, valueApprove) {
@@ -60,34 +73,34 @@ export default function Game(props) {
 
     const [alignment, setAlignment] = useState(currencies[0][0]);
 
-    const handleAlignment = (event, newAlignment) => {
+    const handleAlignment = (event: Event, newAlignment: string) => {
         setAlignment(newAlignment);
     };
 
-    const getBalance = async (token) => {
+    const getBalance = async (token: string) => {
         if (token) {
             const contract = new ethers.Contract(token, [
                 'function balanceOf(address) public view returns (uint256)'
             ], provider)
             const result = await contract.balanceOf(address)
-            setBalance(Math.floor(fromWei(result.toString()) * 100) / 100)
+            setBalance(Math.floor(+fromWei(result.toString()) * 100) / 100)
         }
         else {
             const result = await provider.getBalance(address)
-            setBalance(Math.floor(fromWei(result.toString()) * 100) / 100)
+            setBalance(Math.floor(+fromWei(result.toString()) * 100) / 100)
         }
     }
 
     const { config: startGameBnbConfig } = usePrepareContractWrite({
         address: contractAddress,
         abi: abiMyContract,
-        enabled: enabled.bnb && open && value,
+        enabled: enabled.bnb && open && isDefined(value),
         functionName: 'startGameBnb',
         args: [item + 1],
         overrides: {
-            value: value,
+            value: BigNumber.from(value),
         },
-        onError: (e) => {
+        onError: (e: any) => {
             const error = e?.error?.data?.message || e.data.message;
             setErrorWrite([true, error])
             handleSnackbar('error', error)
@@ -107,11 +120,11 @@ export default function Game(props) {
     const { config: startGameConfig } = usePrepareContractWrite({
         address: contractAddress,
         abi: abiMyContract,
-        enabled: enabled.erc20 && open && value,
+        enabled: enabled.erc20 && open && isDefined(value),
         functionName: 'startGame',
         args: [currency?.[1],
         item + 1, value],
-        onError: (e) => {
+        onError: (e: any) => {
             const error = e?.error?.data?.message || e.data.message;
             setErrorWrite([true, error])
             handleSnackbar('error', error)
@@ -129,12 +142,12 @@ export default function Game(props) {
     })
 
     const { config: approveConfig } = usePrepareContractWrite({
-        address: currency?.[1] || currencies[0][1],
+        address: (currency?.[1] || currencies[0][1]) as `0x${string}`,
         abi: abiErc20,
         enabled: open,
         functionName: 'approve',
         args: [contractAddress, "115792089237316195423570985008687907853269984665640564039457"],
-        onError: (e) => {
+        onError: (e: any) => {
             const error = e.error.data.message;
             setErrorWrite([true, error])
             handleSnackbar('error', error)
@@ -151,10 +164,10 @@ export default function Game(props) {
     const { config: getTokensConfig } = usePrepareContractWrite({
         address: contractAddress,
         abi: abiMyContract,
-        enabled: enabled.erc20 && open && value,
+        enabled: enabled.erc20 && open && isDefined(value),
         functionName: 'getTestTokens',
         args: [currency[1]],
-        onError: (e) => {
+        onError: (e: any) => {
             const error = e?.error?.data?.message || e.data.message;
             setErrorGetTokens([true, error])
         }
@@ -170,7 +183,7 @@ export default function Game(props) {
         }
     })
 
-    const selectItem = (item) => {
+    const selectItem = (item: number) => {
         setItem(item);
         setOpen(true);
         getBalance(currencies[currencies.indexOf(currency)][1])
@@ -187,13 +200,13 @@ export default function Game(props) {
 
     const handleClose = () => {
         setOpen(false)
-        setValue(0)
+        setValue('0')
         setItem(0)
         setErrorWrite([false, ''])
     }
 
     const startGame = () => {
-        if (!value || !currency || value === 0) {
+        if (!value || !currency || value === '0') {
             alert("Одно из значений пустое");
             return 0;
         }
@@ -203,14 +216,14 @@ export default function Game(props) {
         }
     }
 
-    const handleChangeValue = ({ target: { value } }) => {
+    const handleChangeValue = ({ target: { value } }: any) => {
         if (errorWrite[0]) setErrorWrite([false, '']);
 
-        if (value) setValue(toWei(value));
-        else setValue(0);
+        if (value) setValue(String(toWei(value)));
+        else setValue('0');
     }
 
-    const selectCurrency = (selectedCurrency) => {
+    const selectCurrency = (selectedCurrency: number) => {
         if (errorWrite[0] && currencies[selectedCurrency] !== currency) setErrorWrite([false, '']);
         // if (errorGetTokens[0] && currencies[selectedCurrency] !== currency) setErrorGetTokens([false, ''])
 
@@ -224,17 +237,17 @@ export default function Game(props) {
 
     return (
         <>
-            <div className={styles.playArea}>
-                <h2 className={styles.gameTitle}>Выберите элемент:</h2>
+            <div className='playArea'>
+                <h2 className='gameTitle'>Выберите элемент:</h2>
                 <Grid sx={{ mb: "50px" }} container justifyContent="space-around">
-                    <Paper onClick={() => selectItem(0)} className={styles.paper}>
-                        <img alt="камень" className={isDesktop ? styles.icon : styles.iconMobile} src={rock}></img>
+                    <Paper onClick={() => selectItem(0)} className='paper'>
+                        <img alt="камень" className={isDesktop ? 'icon' : 'iconMobile'} src={rock}></img>
                     </Paper>
-                    <Paper onClick={() => selectItem(1)} className={styles.paper}>
-                        <img alt="ножницы" className={isDesktop ? styles.icon : styles.iconMobile} src={scissors}></img>
+                    <Paper onClick={() => selectItem(1)} className='paper'>
+                        <img alt="ножницы" className={isDesktop ? 'icon' : 'iconMobile'} src={scissors}></img>
                     </Paper>
-                    <Paper onClick={() => selectItem(2)} className={styles.paper}>
-                        <img alt="бумага" className={isDesktop ? styles.icon : styles.iconMobile} src={paper}></img>
+                    <Paper onClick={() => selectItem(2)} className='paper'>
+                        <img alt="бумага" className={isDesktop ? 'icon' : 'iconMobile'} src={paper}></img>
                     </Paper>
                 </Grid>
                 <MyContainedButton
@@ -247,13 +260,13 @@ export default function Game(props) {
                     onClose={handleClose}
                 >
                     <Box sx={isDesktop ? style : styleMobile}>
-                        <h2>Выбранный элемент: <span className={styles.strongText}>{items[item]}</span></h2>
-                        <p className={styles.modal}>Выберите монету, принимаемую в виде ставки:</p>
+                        <h2>Выбранный элемент: <span className='strongText'>{items[item]}</span></h2>
+                        <p className='modal'>Выберите монету, принимаемую в виде ставки:</p>
                         <ToggleButtonGroup
                             exclusive
-                            className={styles.modal}
+                            className='modal'
                             value={alignment}
-                            onChange={handleAlignment}>
+                            onChange={handleAlignment as any}>
                             {currencies.map((token, index) => (
                                 <ToggleButton key={index} value={token[0]} onClick={() => selectCurrency(index)}>{token[0]}</ToggleButton >
                             ))}
@@ -261,7 +274,7 @@ export default function Game(props) {
                         {currency ? (
                             <>
                                 <Grid spacing={2} container alignItems='center' sx={{ marginBottom: "10px" }}>
-                                    <Grid item><p>Выбранная монета: <span className={styles.strongText}>{currency[0]}</span></p></Grid>
+                                    <Grid item><p>Выбранная монета: <span className='strongText'>{currency[0]}</span></p></Grid>
                                     {errorWrite[1]?.includes("approve") ?
                                         <Grid item>
                                             <MyContainedButton onClick={infinityApprove}>Approve</MyContainedButton>
@@ -274,22 +287,22 @@ export default function Game(props) {
                                         : null}
                                 </Grid>
 
-                                Баланс: <span className={styles.strongText}>{balance}</span>
+                                Баланс: <span className='strongText'>{balance}</span>
                             </>
                         ) : null}
-                        <MyTextField type="number" onChange={handleChangeValue} className={styles.input} label="Введите количество" size="small" variant="outlined" fullWidth />
-                        {errorWrite[1]?.length ? <span className={styles.error}>{errorWrite[1]}</span> : null}
-                        <div className={styles.modal}>
+                        <MyTextField type="number" onChange={handleChangeValue} className='input' label="Введите количество" size="small" variant="outlined" fullWidth />
+                        {errorWrite[1]?.length ? <span className='error'>{errorWrite[1]}</span> : null}
+                        <div className='modal'>
                             <Grid container justifyContent="space-around">
                                 <MyContainedButton onClick={handleClose}>Отменить выбор</MyContainedButton>
                                 <Button color="success"
                                     disabled={
                                         !value ||
-                                        isNaN(value) ||
+                                        isNaN(Number(value)) ||
                                         Number(value) <= 0 ||
                                         !currency ||
                                         errorWrite[0] ||
-                                        value === 0
+                                        value === '0'
                                     }
                                     sx={!isDesktop && {mt:"15px"}}
                                     onClick={startGame}

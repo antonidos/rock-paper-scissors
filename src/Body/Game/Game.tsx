@@ -11,9 +11,9 @@ import * as React from "react";
 import { VariantType } from "notistack";
 
 
-const rock = '../../../public/icons/stone.png'
-const scissors = '../../../public/icons/scissors.png'
-const paper = '../../../public/icons/new-document.png'
+import rock from '../../icons/stone.png'
+import scissors from '../../icons/scissors.png'
+import paper from '../../icons/new-document.png'
 
 interface GameProps {
     setIsStarted: React.Dispatch<React.SetStateAction<boolean>>,

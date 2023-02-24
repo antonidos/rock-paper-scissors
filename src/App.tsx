@@ -1,4 +1,3 @@
-import './App.css';
 import Header from './Header/Header';
 import Body from './Body/Body';
 import { WagmiConfig } from "wagmi";
@@ -16,7 +15,7 @@ function App() {
   };
 
   return (
-    <div className="App">  
+    <div className="text-center">  
         <WagmiConfig client={wagmiClient}>
           <Header ethereumClient={ethereumClient} />
           <Body handleSnackbar={handleSnackbar} />

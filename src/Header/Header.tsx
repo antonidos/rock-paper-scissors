@@ -1,5 +1,4 @@
 import { Container } from '@mui/system'
-import './Header.css'
 import { Web3Button, Web3Modal } from "@web3modal/react";
 import { Grid } from '@mui/material';
 import { bscTestnet } from 'wagmi/chains';
@@ -17,17 +16,9 @@ export default function Header({ ethereumClient }: HeaderProps) {
         <>
             <Container>
                 <Grid container justifyContent='space-between' alignItems='center'>
-                    {isDesktop ? (
-                        <h1 className='logo'>
-                            Rock Paper Scissors
-                        </h1>
-                    ) : (
-                        <h2 className='logo'>
-                            Rock Paper Scissors
-                        </h2>
-                    )}
-
-
+                    <h1 className='logo'>
+                        Rock Paper Scissors
+                    </h1>
                     <Web3Modal
                         themeMode='dark'
                         themeColor='green'

@@ -1,4 +1,54 @@
-.game {
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #41B3A3;
+}
+
+@layer base {
+  h1,
+  .h1 {
+    @apply text-6xl font-bold leading-none text-[2rem];
+  }
+
+  h2,
+  .h2 {
+    @apply text-6xl font-bold leading-none text-[1.3rem];
+  }
+
+  h3,
+  .h3 {
+    @apply text-6xl font-bold leading-none text-[1rem];
+  }
+
+  .logo {
+    margin: 20px 0;
+    text-align: center;
+    background: linear-gradient(to right, #000 20%, #800 40%, #800 60%, #000 80%);
+    background-size: 200% auto;
+    color: #000;
+    background-clip: text;
+    text-fill-color: transparent;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -webkit-animation: shine 2s linear infinite;
+    animation: shine 2s linear infinite;
+  }
+
+  @-webkit-keyframes shine {
+    to {
+      background-position: 200% center;
+    }
+  }
+  
+  @keyframes shine {
+    to {
+      background-position: 200% center;
+    }
+  }
+
+  .game {
     position: absolute;
     top: 50vh;
     left: 50vw;
@@ -59,3 +109,5 @@
 .strongText {
     color: #b34151;
 }
+}
+

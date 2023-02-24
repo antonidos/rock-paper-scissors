@@ -1,6 +1,5 @@
 import { Box, Button, Grid, Modal, Paper, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { useMediaQuery } from 'react-responsive'
-import './Game.css'
 import { BigNumber, ethers } from 'ethers';
 import { useEffect, useLayoutEffect, useState } from "react";
 import { useAccount, useContractEvent, useContractWrite, usePrepareContractWrite, useProvider } from 'wagmi'
@@ -24,8 +23,7 @@ type IError = [[boolean, string], React.Dispatch<React.SetStateAction<[boolean, 
 
 export default function Game(props: GameProps) {
     
-
-    const isDesktop = useMediaQuery({ minWidth: 500 })
+    const isDesktop = useMediaQuery({ minWidth: 480 })
     const provider = useProvider()
 
     const { setIsStarted, handleSnackbar } = props;
@@ -265,6 +263,7 @@ export default function Game(props: GameProps) {
                         <ToggleButtonGroup
                             exclusive
                             className='modal'
+                            size={isDesktop ? "medium" : 'small'}
                             value={alignment}
                             onChange={handleAlignment as any}>
                             {currencies.map((token, index) => (

@@ -1,6 +1,5 @@
 import { Container } from "@mui/system";
 import { useEffect, useState } from "react";
-import './Game/Game.css'
 
 import { useAccount, useNetwork, useSwitchNetwork } from 'wagmi'
 import Game from "./Game/Game";
